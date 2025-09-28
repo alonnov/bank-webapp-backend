@@ -1,0 +1,67 @@
+# Default configuration for Banking Webapp
+app:
+  name: "Banking Webapp"
+  version: "1.0.0"
+  port: ${PORT}
+  environment: "production"
+
+# Database configuration
+database:
+  host: ${MONGO_HOST}
+  port: ${MONGO_PORT}
+  name: ${MONGO_DB}
+  user: ${MONGO_USER}
+  password: ${MONGO_PASS}
+  dialect: "mongo"
+  pool:
+    max: 10
+    min: 0
+    acquire: 30000
+    idle: 10000
+
+
+# JWT configuration
+jwt:
+  secret: "${JWT_SECRET}"
+  expiresIn: "24h"
+  refreshExpiresIn: "7d"
+  issuer: "banking-webapp"
+  audience: "banking-users"
+
+
+# Security configuration
+security:
+  bcryptRounds: 12
+  passwordMinLength: 8
+  passwordMaxLength: 32
+  passwordRequireUppercase: true
+  passwordRequireLowercase: true
+  passwordRequireNumbers: true
+  passwordRequireSpecialChars: true
+  rateLimit:
+    windowMs: 900000 # 15 * 60 * 1000 (15 minutes)
+    max: 100  # limit each IP to 100 requests per windowMs
+  cors:
+    origin: ["http://localhost:3000", "http://localhost:3001"]
+    credentials: true
+
+# Email configuration for nodemailer
+email:
+  service: "gmail"
+  host: "smtp.gmail.com"
+  port: 587
+  secure: false
+  auth:
+    user: ${USER_EMAIL} # email address to send emails from
+    pass: ${EMAIL_PASSKEY} # your email passkey
+  verificationCodeExpireMs: 600000 # 10 * 60 * 1000 (10 minutes)
+  verificationCodeLength: 6
+
+# Banking specific settings
+banking:
+  defaultBalance: 0
+  minTransactionAmount: 1
+  maxTransactionAmount: 100000
+  accountNumberLength: 10 
+  transactionsPerPage: 10
+
