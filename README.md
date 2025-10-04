@@ -4,18 +4,19 @@ A backend banking system built with Node.js and TypeScript that provides user ma
 
 ## Architecture
 
-Components:
+Main Components:
 - Server: Handles authentication, account management, and transaction processing
 - Database: Stores user details, accounts and transaction history
 - Middleware: Validates requests and handles authentication
 
 Key Features:
 - User registration with OTP-based email verification
+- Secure JWT authentication and session management
 - Transactions between registered accounts
-- Transaction history tracking
-- JWT authentication and role-based access control
-- Modular, testable backend codebase with TypeScript
-- RESTful API design
+- Full transaction history tracking
+- Modular, testable TypeScript codebase
+- RESTful API design with integrated Swagger documentation
+
 
 ## Project Structure
 
@@ -29,7 +30,7 @@ src/swagger/			- API documentation
 src/types/				- Internal type declarations
 src/utils/             	- Helper functions
 src/libs/				- Used libraries
-test/                 	- Unit tests
+test/                 	- postman files, intergration and unit tests
 config/                	- Environment configuration
 package.json           	- Dependencies and scripts
 tsconfig.json          	- TypeScript config
@@ -40,20 +41,45 @@ tsconfig.json          	- TypeScript config
 The project uses environment variables to configure storage and security.
 Create a .env file in the project root:
 
-Example .env (Local Storage)
+### Example .env (Local Storage)
 	PORT=3000
+	JWT_SECRET=your-jwt-secret
+	
 	USER_DB=local
 	ACCOUNT_DB=local
 	TRANSACTION_DB=local
-	INITIAL_ACCOUNT_BALANCE=50
 	
-Example .env (MongoDB)
+	USER_EMAIL=youremail@gmail.com
+	EMAIL_PASSKEY=alfuibalcouabcoan 
+	APP_NAME="My Bank"
+	EMAIL_FROM_ADDRESS=noreply@My-Bank.com
+	
+	INITIAL_ACCOUNT_BALANCE=5000
+	
+### Example .env (MongoDB)
 	PORT=3000
+	JWT_SECRET=your-jwt-secret
+
 	USER_DB=mongo
 	ACCOUNT_DB=mongo
 	TRANSACTION_DB=mongo
-	INITIAL_ACCOUNT_BALANCE=750
 
+	MONGO_URI=mongodb://localhost:27017/banking_db
+	MONGO_HOST=localhost
+	MONGO_PORT=27017
+	MONGO_DB=banking_db
+	MONGO_USER=user
+	MONGO_PASS=pass
+
+	DB_TEST_NAME=MyName
+
+	USER_EMAIL=youremail@gmail.com
+	EMAIL_PASSKEY=alfuibalcouabcoan 
+	APP_NAME="My Bank"
+	EMAIL_FROM_ADDRESS=noreply@My-Bank.com
+
+	INITIAL_ACCOUNT_BALANCE=5000
+	
 ## Quick Start
 
 Prerequisites:
@@ -62,7 +88,8 @@ Prerequisites:
 - MongoDB instance (only if DB_TYPE=mongo)
 
 Installation:
-1. Clone the repository: git clone <repo-url> && cd bank_project
+1. Clone the repository: git clone https://github.com/<your-username>/bank_project.git
+   cd bank_project
 2. Install dependencies: npm install
 3. Build the project: npm run build
 4. Start the server: npm start
@@ -70,17 +97,33 @@ Installation:
 
 ## API Endpoints
 
-Public:
-- POST /register — Register a new user
-- POST /login — Authenticate and receive JWT
+### Public (no authentication):
+Endpoints for signup, login, and email verification.
 
-Account (requires authentication):
-- POST /account — Create a new account
-- GET /account/:id — Get account details
-- POST /account/:id/deposit — Deposit funds
-- POST /account/:id/withdraw — Withdraw funds
-- POST /account/:id/transfer — Transfer funds to another account
-- GET /account/:id/transactions — View transaction history
+- POST 	/public/signup - Register a new user
+- POST 	/public/login - Authenticate and receive JWT
+
+- POST	/public/verify/send - Send verification email after signup or email change
+- POST 	/public/verify/verify - Confirm email ownership using the verification code
+- POST 	/public/verify/status - Check account’s email verification status
+
+### Authenticated (requires valid JWT):
+Endpoints for user account management and transactions.
+
+- GET 	/auth/ - Get account dashboard (balance, recent transactions)
+- POST 	/auth/logout - Log out the current user
+
+- GET	/auth/info - Retrieve full user profile information
+- PUT	/auth/info - Update user profile information
+
+- POST 	/auth/security/change-email - Request an email address change
+- POST	/auth/security/confirm-email-change - Confirm email change using verification code
+- POST 	/auth/security/change-password - Change account password
+
+- GET 	/auth/transactions/history - View complete transaction history
+- GET	/auth/transactions/:id - Retrieve a specific transaction by ID
+- POST 	/auth/transactions/ - Create a new transaction
+
 
 ## API Documentation
 
@@ -96,8 +139,8 @@ swagger.yaml -> Generated output (can be regenerated anytime)
     
 ## Testing
 
-- Run unit tests: npm test
 - Run integration tests: npm run test:integration
+- Run unit tests only: npm run test:unit (if applicable)
 - Verify API endpoints using Postman or curl
 
 ## Troubleshooting
