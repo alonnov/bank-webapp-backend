@@ -1,4 +1,4 @@
-import { dbConfig } from '../config/config';
+import { dbConfig, servicesConfig } from '../config/config';
 
 // DB Interfaces
 import { IUserService } from './interfaces/userServiceInterface';
@@ -18,15 +18,14 @@ import { MongoClient } from 'mongodb';
 
 let mongoClient: MongoClient | null = null;
 
-const USER_DB = process.env.USER_DB || 'local';
-const ACCOUNT_DB = process.env.ACCOUNT_DB || 'local';
-const TRANSACTION_DB = process.env.TRANSACTION_DB || 'local';
+const USER_DB = servicesConfig.userDb;
+const ACCOUNT_DB = servicesConfig.accountDb;
+const TRANSACTION_DB = servicesConfig.transactionDb;
 
 function getMongoClient(): MongoClient {
   if (!mongoClient) {
     if ([USER_DB, ACCOUNT_DB, TRANSACTION_DB].includes('mongo')) {
-      const connectionString =
-        process.env.MONGO_URI || `mongodb://${dbConfig.host}:${dbConfig.port}/${dbConfig.name}`;
+      const connectionString = servicesConfig.mongoUri || `mongodb://${dbConfig.host}:${dbConfig.port}/${dbConfig.name}`;
 
       mongoClient = new MongoClient(connectionString, {
         maxPoolSize: dbConfig.pool.max,

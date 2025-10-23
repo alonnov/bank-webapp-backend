@@ -1,6 +1,7 @@
 import { MongoClient, Db, Collection } from 'mongodb';
 import { Account } from '../../types/types';
 import { generateAccountId } from '../../utils/IdHash';
+import { bankingConfig } from '../../config/config';
 
 
 export class AccountMongoService {
@@ -17,10 +18,9 @@ export class AccountMongoService {
    */
   async createAccount(userId: string): Promise<Account> {
     const accountId = generateAccountId(userId);
-    const initialBalance = parseInt(process.env.INITIAL_ACCOUNT_BALANCE || '0', 10);
     const newAccount: Account = {
       id: accountId,
-      balance: initialBalance,
+      balance: bankingConfig.defaultBalance,
       created: new Date(),
       last_update: new Date(),
       status: 'active',

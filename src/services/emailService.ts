@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { emailConfig } from '../config/config';
+import { appConfig, emailConfig } from '../config/config';
 
 type CodeEntry = { code: string; expiresAt: Date; lastSentAt: Date };
 const verificationCodes = new Map<string, CodeEntry>();
@@ -71,7 +71,7 @@ export class EmailService {
 
   async sendPasswordResetEmail(email: string, resetToken: string): Promise<boolean> {
     try {
-      const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+      const resetLink = `${appConfig.frontendUrl}/reset-password?token=${resetToken}`;
       
       const mailOptions = {
         from: this.fromAddress,

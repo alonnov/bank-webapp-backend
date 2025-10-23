@@ -8,6 +8,7 @@ export interface AppConfig {
   version: string;
   port: number;
   environment: string;
+  frontendUrl: string;
 }
 
 export interface DbConfig {
@@ -74,6 +75,13 @@ export interface BankingConfig {
   transactionsPerPage: number;
 }
 
+export interface ServiceSelectionConfig {
+  userDb: string;
+  accountDb: string;
+  transactionDb: string;
+  mongoUri?: string;
+}
+
 export interface Config {
   app: AppConfig;
   database: DbConfig;
@@ -81,6 +89,7 @@ export interface Config {
   security: SecurityConfig;
   email: EmailConfig;
   banking: BankingConfig;
+  services: ServiceSelectionConfig; // New field
 }
 
 
@@ -91,35 +100,60 @@ function loadConfig(): Config {
   try {
     const configFile = readFileSync(configPath, 'utf8');
     const config = parse(configFile) as Config;
+    
+    // Override app config with environment variables
+    config.app = {
+      ...config.app,
+      frontendUrl: process.env.FRONTEND_URL || config.app.frontendUrl || 'http://localhost:3000',
+    };
 
+    // Override with environment variables
     config.database = {
-      host: process.env.MONGO_HOST || config.database.host || 'localhost',
-      port: Number(process.env.MONGO_PORT) || config.database.port || 27017,
-      name: process.env.MONGO_DB || config.database.name || 'banking_db',
-      user: process.env.MONGO_USER || config.database.user || '', // empty if no auth
-      password: process.env.MONGO_PASS || config.database.password || '',
-      dialect: config.database.dialect || 'mongo',
+      ...config.database,
+      host: process.env.MONGO_HOST || config.database.host,
+      port: Number(process.env.MONGO_PORT) || config.database.port,
+      name: process.env.MONGO_DB || config.database.name,
+      user: process.env.MONGO_USER || config.database.user,
+      password: process.env.MONGO_PASS || config.database.password,
       pool: {
-        max: Number(process.env.MONGO_POOL_MAX) || config.database.pool.max || 10,
-        min: Number(process.env.MONGO_POOL_MIN) || config.database.pool.min || 0,
-        acquire: Number(process.env.MONGO_POOL_ACQUIRE) || config.database.pool.acquire || 30000,
-        idle: Number(process.env.MONGO_POOL_IDLE) || config.database.pool.idle || 10000,
+        ...config.database.pool,
+        max: Number(process.env.MONGO_POOL_MAX) || config.database.pool.max,
+        min: Number(process.env.MONGO_POOL_MIN) || config.database.pool.min,
+        acquire: Number(process.env.MONGO_POOL_ACQUIRE) || config.database.pool.acquire,
+        idle: Number(process.env.MONGO_POOL_IDLE) || config.database.pool.idle,
       },
     };
 
     config.email = {
-      service: config.email?.service || 'gmail',
-      host: config.email?.host || 'smtp.gmail.com',
-      port: Number(config.email?.port) || 587,
-      secure: config.email?.secure || false,
+      ...config.email,
+      service: process.env.EMAIL_SERVICE || config.email.service,
+      host: process.env.EMAIL_HOST || config.email.host,
+      port: Number(process.env.EMAIL_PORT) || config.email.port,
+      secure: process.env.EMAIL_SECURE ? process.env.EMAIL_SECURE === 'true' : config.email.secure,
       auth: {
-        user: process.env.USER_EMAIL || config.email?.auth?.user || '',
-        pass: process.env.EMAIL_PASSKEY || config.email?.auth?.pass || '',
+        ...config.email.auth,
+        user: process.env.USER_EMAIL || config.email.auth.user,
+        pass: process.env.EMAIL_PASSKEY || config.email.auth.pass,
       },
-      appName: process.env.APP_NAME || config.email?.appName || 'Bank App',
-      fromAddress: process.env.EMAIL_FROM_ADDRESS || config.email?.appName || 'Bank App',
-      verificationCodeExpireMs: config.email?.verificationCodeExpireMs || 10 * 60 * 1000,
-      verificationCodeLength: config.email?.verificationCodeLength || 6,
+      appName: process.env.APP_NAME || config.email.appName,
+      fromAddress: process.env.EMAIL_FROM_ADDRESS || config.email.fromAddress,
+    };
+
+    // Override banking config with environment variables
+    config.banking = {
+      ...config.banking,
+      defaultBalance: Number(process.env.INITIAL_ACCOUNT_BALANCE) || config.banking.defaultBalance,
+    };
+
+    // Ensure config.services exists, even if not in YAML
+    config.services = config.services || {};
+
+    // New service selection overrides
+    config.services = {
+      userDb: process.env.USER_DB || config.services.userDb || 'local',
+      accountDb: process.env.ACCOUNT_DB || config.services.accountDb || 'local',
+      transactionDb: process.env.TRANSACTION_DB || config.services.transactionDb || 'local',
+      mongoUri: process.env.MONGO_URI || config.services.mongoUri,
     };
 
     return config;
@@ -137,5 +171,4 @@ export const jwtConfig = config.jwt;
 export const emailConfig = config.email;
 export const securityConfig = config.security;
 export const bankingConfig = config.banking;
-
-
+export const servicesConfig = config.services; // New export
