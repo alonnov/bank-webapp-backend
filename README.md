@@ -30,7 +30,7 @@ src/swagger/			- API documentation
 src/types/				- Internal type declarations
 src/utils/             	- Helper functions
 src/libs/				- Used libraries
-test/                 	- postman files, intergration and unit tests
+test/                 	- Postman files, intergration and unit tests
 config/                	- Environment configuration
 package.json           	- Dependencies and scripts
 tsconfig.json          	- TypeScript config
